@@ -6,3 +6,6 @@ var DaySchema = new mongoose.Schema({
   restaurants: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' } ],
   activities: [ {type: mongoose.Schema.Types.ObjectId, ref: 'Activity' } ]
 });
+
+module.exports =mongoose.model('Day', DaySchema);
+

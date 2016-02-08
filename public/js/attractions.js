@@ -44,8 +44,8 @@ var attractionsModule = (function(){
     // itinerary
     switch (this.type) {
       case 'hotel': $hotel.append(this.$itineraryItem); break;
-      case 'restaurant': $restaurants.append(this.$itineraryItem); break;
-      case 'activity': $activities.append(this.$itineraryItem); break;
+      case 'restaurants': $restaurants.append(this.$itineraryItem); break;
+      case 'activities': $activities.append(this.$itineraryItem); break;
       default: console.error('bad type:', this);
     }
     // map

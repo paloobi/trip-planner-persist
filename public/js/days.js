@@ -1,4 +1,4 @@
-'use strict';
+  'use strict';
 /* global $ utilsModule */
 
 var daysModule = (function(){
@@ -24,6 +24,12 @@ var daysModule = (function(){
     this.activities = [];
     this.number = days.push(this);
     this.buildButton().drawButton();
+  }
+
+  Day.prototype.saveToDB = function() {
+    $.post('/api/days/'+this.number, function() {
+      console.log('sent to be saved to db');
+    });
   }
 
   Day.prototype.buildButton = function() {
@@ -60,7 +66,7 @@ var daysModule = (function(){
     this.$button.addClass('current-day');
     $dayTitle.text('Day ' + this.number);
     // attractions UI
-    function draw (attraction) { attraction.draw(); }
+   function draw (attraction) { attraction.draw(); }
     if (this.hotel) draw(this.hotel);
     this.restaurants.forEach(draw);
     this.activities.forEach(draw);
@@ -84,11 +90,15 @@ var daysModule = (function(){
     $removeButton.on('click', deleteCurrentDay);
   });
 
-  function addDay () {
+  function addDay (init) {
     if (this && this.blur) this.blur(); // removes focus box from buttons
     var newDay = new Day();
     if (days.length === 1) currentDay = newDay;
     newDay.switchTo();
+    if (!init || typeof init === 'object') {
+      newDay.saveToDB();
+    }
+    return newDay;
   }
 
   function deleteCurrentDay () {
@@ -104,26 +114,57 @@ var daysModule = (function(){
     previousDay.hideButton();
   }
 
+
   // globally accessible module methods
 
   var methods = {
 
     load: function(){
-      $(addDay);
+      $.get('/api/days', function(allDays) {
+        if (allDays.length > 0) {
+          allDays.forEach(function(day, index){
+            $(addDay(true));
+            if (day.hotel) {
+              days[index].hotel = attractionsModule.create(day.hotel);
+              days[index].hotel.type = 'hotel';
+            }
+            if (day.restaurants) {
+              days[index].restaurants = day.restaurants.map(function(restaurant){
+                var newItem = attractionsModule.create(restaurant);
+                newItem.type = 'restaurants';
+                return newItem;
+              });
+            }
+            if (day.activities) {
+              days[index].activities = day.activities.map(function(activity) {
+                var newItem = attractionsModule.create(activity);
+                newItem.type = 'activities';
+                return newItem;
+              });
+            };
+
+          });
+          days[0].switchTo()
+        } else {
+          $(addDay(null));
+        }
+      });
     },
 
-    addAttraction: function(attraction){
+    addAttraction:   function (attraction){
       // adding to the day object
       switch (attraction.type) {
         case 'hotel':
           if (currentDay.hotel) currentDay.hotel.delete();
           currentDay.hotel = attraction; break;
-        case 'restaurant':
+        case 'restaurants':
           utilsModule.pushUnique(currentDay.restaurants, attraction); break;
-        case 'activity':
+        case 'activities':
           utilsModule.pushUnique(currentDay.activities, attraction); break;
         default: console.error('bad type:', attraction);
       }
+      $.post('/api/days/' + currentDay.number + '/' + attraction.type + '/' + attraction._id, function(resData){ console.log(resData); });
+
       // activating UI
       attraction.draw();
     },
@@ -133,9 +174,9 @@ var daysModule = (function(){
       switch (attraction.type) {
         case 'hotel':
           currentDay.hotel = null; break;
-        case 'restaurant':
+        case 'restaurants':
           utilsModule.remove(currentDay.restaurants, attraction); break;
-        case 'activity':
+        case 'activities':
           utilsModule.remove(currentDay.activities, attraction); break;
         default: console.error('bad type:', attraction);
       }
