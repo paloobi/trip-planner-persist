@@ -33,7 +33,11 @@ router.get('/:day', function(req, res, next) {
 });
 
 router.delete('/:day', function(req, res, next) {
-	// Day.findOneAndRemove
+	Day.findOne({ number: Number(req.params.day) })
+	.then(function(day){
+		return day.remove();
+	})
+	.then(null, next);
 });
 
 
@@ -41,10 +45,11 @@ router.delete('/:day', function(req, res, next) {
 router.post('/:day/:attractionType/:attraction', function(req, res, next) {
 	Day.findOne({ number: Number(req.params.day) })
 	.then(function(day){
-		if (req.params.attractionType === 'hotel') {
-			day[req.params.attractionType] = req.params.attraction;
+		var type = req.params.attractionType;
+		if (type === 'hotel') {
+			day[type] = req.params.attraction;
 		} else {
-			day[req.params.attractionType].push(req.params.attraction);
+			if (day[type].indexOf(req.params.attraction) === -1) day[type].push(req.params.attraction);
 		}
 		return day.save();
 	}).then(null, next);

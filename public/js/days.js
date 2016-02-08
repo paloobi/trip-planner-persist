@@ -163,7 +163,7 @@ var daysModule = (function(){
       // adding to the day object
       switch (attraction.type) {
         case 'hotel':
-          if (currentDay.hotel) currentDay.hotel.delete();
+          if (currentDay.hotel) currentDay.hotel.removeFromDay();
           currentDay.hotel = attraction; break;
         case 'restaurants':
           utilsModule.pushUnique(currentDay.restaurants, attraction); break;
