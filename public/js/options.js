@@ -24,7 +24,7 @@ $(function(){
   function addAttraction () {
     var $button = $(this);
     var attraction = $button.siblings('select').find(':selected').data();
-    daysModule.addAttraction(attraction); // model
+    daysModule.addAttraction(attractionsModule.create(attraction)); // model
   }
 
 });

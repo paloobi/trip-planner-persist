@@ -98,7 +98,6 @@ var daysModule = (function(){
     if (!init || typeof init === 'object') {
       newDay.saveToDB();
     }
-    return newDay;
   }
 
   function deleteCurrentDay () {
@@ -131,20 +130,24 @@ var daysModule = (function(){
       $.get('/api/days', function(allDays) {
         if (allDays.length > 0) {
           allDays.forEach(function(day, index){
-            $(addDay(true));
+            var newDay = new Day();
+            if (days.length === 1) currentDay = newDay;
             if (day.hotel) {
-              days[index].hotel = attractionsModule.create(day.hotel);
-              days[index].hotel.type = 'hotel';
+              day.hotel.type = 'hotel';
+              newDay.hotel = attractionsModule.create(day.hotel);
+              newDay.hotel.type = 'hotel';
             }
             if (day.restaurants) {
-              days[index].restaurants = day.restaurants.map(function(restaurant){
+              newDay.restaurants = day.restaurants.map(function(restaurant){
+                restaurant.type = 'restaurants';
                 var newItem = attractionsModule.create(restaurant);
                 newItem.type = 'restaurants';
                 return newItem;
               });
             }
             if (day.activities) {
-              days[index].activities = day.activities.map(function(activity) {
+              newDay.activities = day.activities.map(function(activity) {
+                activity.type = 'activities';
                 var newItem = attractionsModule.create(activity);
                 newItem.type = 'activities';
                 return newItem;
@@ -152,7 +155,7 @@ var daysModule = (function(){
             };
 
           });
-          days[0].switchTo()
+          days[0].switchTo();
         } else {
           $(addDay(null));
         }
@@ -161,20 +164,23 @@ var daysModule = (function(){
 
     addAttraction:   function (attraction){
       // adding to the day object
+      var added = false;
+      // console.log("BEFORE current day.restaurants: ",currentDay.restaurants, "attraction to add: ", attraction);
       switch (attraction.type) {
         case 'hotel':
           if (currentDay.hotel) currentDay.hotel.removeFromDay();
-          currentDay.hotel = attraction; break;
+          currentDay.hotel = attraction;
+          added = true;
+          break;
         case 'restaurants':
-          utilsModule.pushUnique(currentDay.restaurants, attraction); break;
+          added = utilsModule.pushUnique(currentDay.restaurants, attraction); break;
         case 'activities':
-          utilsModule.pushUnique(currentDay.activities, attraction); break;
+          added = utilsModule.pushUnique(currentDay.activities, attraction); break;
         default: console.error('bad type:', attraction);
       }
       $.post('/api/days/' + currentDay.number + '/' + attraction.type + '/' + attraction._id, function(resData){ console.log(resData); });
 
-      // activating UI
-      attraction.draw();
+      if ( added ) attraction.draw() ;
     },
 
     removeAttraction: function (attraction) {

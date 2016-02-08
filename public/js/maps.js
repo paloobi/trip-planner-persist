@@ -53,10 +53,11 @@ var mapModule = (function(){
     buildAttractionMarker: function (attraction) {
       var iconPath = {
         hotel: '/images/lodging_0star.png',
-        restaurant: '/images/restaurant.png',
-        activity: '/images/star-3.png'
+        restaurants: '/images/restaurant.png',
+        activities: '/images/star-3.png'
       };
       var coords = attraction.place[0].location;
+      console.log(attraction.type)
       var options = {
         icon: iconPath[attraction.type],
         position: new google.maps.LatLng(coords[0], coords[1]),
