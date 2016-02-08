@@ -33,7 +33,7 @@ router.get('/:day', function(req, res, next) {
 });
 
 router.delete('/:day', function(req, res, next) {
-
+	// Day.findOneAndRemove
 });
 
 
@@ -44,7 +44,6 @@ router.post('/:day/:attractionType/:attraction', function(req, res, next) {
 		if (req.params.attractionType === 'hotel') {
 			day[req.params.attractionType] = req.params.attraction;
 		} else {
-			console.log('trying to add ', req.params.attraction, ' to day ', req.params.day, req.params.attractionType)
 			day[req.params.attractionType].push(req.params.attraction);
 		}
 		return day.save();
@@ -52,7 +51,14 @@ router.post('/:day/:attractionType/:attraction', function(req, res, next) {
 });
 
 router.delete('/:day/:attractionType/:attraction', function(req, res, next) {
-
+	Day.findOne({ number: Number(req.params.day )})
+	.then(function(day){
+		var type = req.params.attractionType;
+		if(type === 'hotel') day[type] = null;
+		else day[type].pull(req.params.attraction);
+		return day.save();
+	})
+	.then(null, next);
 });
 
 

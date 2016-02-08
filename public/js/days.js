@@ -110,9 +110,17 @@ var daysModule = (function(){
       day.number = idx + 1;
       day.$button.text(day.number);
     });
+
+    $.ajax({
+        method: 'DELETE',
+        url: '/api/days/'+currentDay.number,
+        success: function(data) {
+          console.log(data);
+        }
+      })
     newCurrent.switchTo();
     previousDay.hideButton();
-  }
+   }
 
 
   // globally accessible module methods
@@ -180,6 +188,13 @@ var daysModule = (function(){
           utilsModule.remove(currentDay.activities, attraction); break;
         default: console.error('bad type:', attraction);
       }
+      $.ajax({
+        method: 'DELETE',
+        url: '/api/days/'+currentDay.number+'/'+attraction.type+'/'+attraction._id,
+        success: function(data) {
+          console.log(data.status);
+        }
+      })
       // deactivating UI
       attraction.hide();
     }
